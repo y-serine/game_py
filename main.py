@@ -7,7 +7,8 @@ import time
 import random 
 GRAB_MODE=False
 
-class gamec(object):
+
+class Gamec(object):
     def __init__(self):
         self.SCREEN_X = 640
         self.SCREEN_Y = 480
@@ -15,15 +16,17 @@ class gamec(object):
         self.counter=0
         pygame.init()
         self.screen = pygame.display.set_mode(self.SCREEN_SIZE,pygame.DOUBLEBUF|pygame.HWSURFACE)
-        pygame.display.set_icon(pygame.image.load("serine.bmp").convert())
+        pygame.display.set_icon(pygame.image.load("serine.png").convert())
         pygame.display.set_caption("window")
         pygame.event.set_grab(GRAB_MODE)
         pygame.mixer.init()
         pygame.mixer.music.set_volume(0.3)
+        
     def execute(self):
         while True:
             self.state()
             self.event.check()
+            
     def end(self):
         pygame.display.quit()
         sys.exit()
@@ -31,30 +34,40 @@ class gamec(object):
     def __call__(self):
         self.execute()
 
-class statec(object):
+
+class Statec(object):
     def __init__(self):
         self.state=self.first_ini
+        
     def __call__(self):
         self.state()
+        
     def first_ini(self):
         self.state=self.ini
+        
     def ini(self):
         self.state=self.play
         pygame.key.set_repeat(1,1)
+        
     def play(self):
         game.draw()
+        
     def ending(self):
         pygame.key.set_repeat()
         
         
-class drawc(object):
+class Drawc(object):
     def __init__(self):pass
+    
     def __call__(self):
         self.draw_main()
+        
     def draw_main(self):
         self.draw_HW()
         game.tools.syncfunc()
         pygame.display.flip()
+
+    #pnly writes Hello World
     def draw_HW(self):
         game.screen.fill((100,100,100))
         font = pygame.font.Font(None, 36)
@@ -68,10 +81,14 @@ class drawc(object):
         textpos.centerx = game.screen.get_rect().centerx
         textpos.centery = game.screen.get_rect().centery+20
         game.screen.blit(text, textpos)
-class eventc(object):
+
+        
+class Eventc(object):
     def __init__(self):pass
+    
     def __call__(self):
         pass
+    
     def check(self):
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -83,84 +100,113 @@ class eventc(object):
                 elif event.key == K_q:
                     game.end()
                 elif event.key == K_RETURN:
-                    self.control.btn_M=True
+                    self.control.btn.M.push()
                 elif event.key == K_z:
-                    self.control.btn_z=True
+                    self.control.btn.z.push()
                 elif event.key == K_x:
-                    self.control.btn_x=True
-class controlc(object):
+                    self.control.btn.x.push()
+
+                    
+class Controlc(object):
     def __init__(self):
-        self.reset()
-        self.btn=self.btnc()
-        self.arr=self.arrc()
+        self.btn=self.Btnc()
+        self.arr=self.Arrc()
+        #self.reset()
         self.all=self.btn.all+self.arr.all
+        
     def reset(self):
-        btn=self.btnc()
-        self.dir_v=None
-        self.dir_h=None
-    def process(self):pass
-    class btnc(object):
+        self.btn.reset()
+        self.arr.reset()
+        
+    def process(self):
+        self.btn.sync()
+        self.arr.sync()
+
+        
+    class Btnc(object):
         def __init__(self):
-            self.z=self.btnname()
-            self.x=self.btnname()
-            self.a=self.btnname()
-            self.s=self.btnname()
-            self.M=self.btnname()
-            self.S=self.btnname()
-            self.C=self.btnname()
+            self.z=self.Btnname()
+            self.x=self.Btnname()
+            self.a=self.Btnname()
+            self.s=self.Btnname()
+            self.M=self.Btnname()
+            self.S=self.Btnname()
+            self.C=self.Btnname()
             self.main=(self.z,self.x,self.a,self.s)
             self.sub=(self.M,self.S,self.C)
             self.all=self.main+self.sub
+            
+        def reset(self):
+            for b in self.all:
+                b.reset()
+                
         def sync(self):
             for b in self.all:
                 b.sync()
+                
         def pushed(self):
             return (self.z.pushed() or self.x.pushed() or self.a.pushed() or self.s.pushed())
-        class btnname(object):
+
+        
+        class Btnname(object):
             def __name__(self):
                 self.incl=0
                 self.value=0
+                
             def push(self):
                 self.incl=1
                 self.value += 1
-            def release(self):
+                
+            def reset(self):
                 self.incl=0
                 self.value=0
+                
             def sync(self):
                 self.value*=self.incl
                 self.incl=0
+                
             def pushed(self):
                 return self.value
-    class arrc(object):
+
+            
+    class Arrc(object):
         def __init__(self):
-            self.up=self.arrname()
-            self.down=self.arrname()
-            self.left=self.arrname()
-            self.right=self.arrname()
-            self.vert=self.vertc()
-            self.hrzn=self.hrznc()
+            self.up=self.Arrnamec()
+            self.down=self.Arrnamec()
+            self.left=self.Arrnamec()
+            self.right=self.Arrnamec()
+            self.vert=self.Dirsc()
+            self.hrzn=self.Dirsc()
             self.vert.keys=(self.up,self.down)
             self.hrzn.keys=(self.left,self.right)
             self.all=self.vert()+self.hrzn()
+
+        #called every frame in control  
         def sync(self):
             for b in self.all:
                 b.sync()
-        class vertc(object):
+
+        #set all zero
+        def reset(self):
+            for b in self.all:
+                b.reset()
+
+        #disables inverse directions        
+        class Dirsc(object):
             def __init__(self):
                 self.on=False
                 self.keys=None
+                
             def __call__(self):
                 return self.keys
-        class hrznc(object):
+
+            
+        class Arrnamec(object):
             def __init__(self):
-                self.on=False
-                self.keys=None
-            def __call__(self):
-                return self.keys
-        class arrname(object):
-            def __name__(self):
                 self.incl=0
                 self.value=0
+
+            #called when this pushed
             def push(self):
                 if (self.dirs()).on and self.value==0:
                     self.incl=0
@@ -168,41 +214,51 @@ class controlc(object):
                     (self.dirs()).on=True
                     self.incl=1
                     self.value += 1
-            def release(self):
+
+            #set all zero      
+            def reset(self):
                 if (self.dirs()).on and self.value:
                     (self.dirs()).on=False
                 self.incl=0
                 self.value=0
+
+            #returns which this belongs to
             def dirs(self):
                 if self==game.control.arr.up or self ==game.control.arr.down:
                     return game.control.arr.vert
                 else:
                     return game.control.arr.hrzn
+
+            #called every frame in arr  
             def sync(self):
                 if self.incl==0:
-                    self.release()
+                    self.reset()
                 self.incl=0
+
+            #if pushed    
             def pushed(self):
                 return self.value
             
         
-class toolsc(object):
+class Toolsc(object):
     def syncfunc(self):
         game.control.reset()
         game.counter+=1
         game.event.check()
         game.control.process()
+
     
-game=gamec()
-game.state=statec()
-game.draw=drawc()
-game.tools=toolsc()
-game.control=controlc()
-game.event=eventc()
+game=Gamec()
+game.state=Statec()
+game.draw=Drawc()
+game.tools=Toolsc()
+game.control=Controlc()
+game.event=Eventc()
 
 
 def main():
     game()
+
 
 if __name__ == "__main__":
     main()
