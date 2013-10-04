@@ -88,6 +88,7 @@ class Drawc(object):
     def draw_main(self):
         self.draw_HW()
         game.tools.syncfunc()
+        game.clock.tick(30)
         pygame.display.flip()
 
     #pnly writes Hello World
@@ -120,7 +121,7 @@ class Eventc(object):
                 if DISABLE_X_EXIT:
                     pass
                 else:
-                    self.end()
+                    game.end()
             elif event.type==KEYDOWN:
                 if event.key == K_ESCAPE:
                     game.end()
@@ -397,6 +398,7 @@ game.draw=Drawc()
 game.tools=Toolsc()
 game.control=Controlc()
 game.event=Eventc()
+game.clock=pygame.time.Clock()
 
 
 def main():
